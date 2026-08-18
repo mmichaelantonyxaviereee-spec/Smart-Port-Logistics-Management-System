@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Freight & Transportation - Smart Port & Logistics">
+    <title>Freight & Transportation - Smart Port & Logistics</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <link rel="stylesheet" href="pages-style.css">
+    <script src="config.js"></script>
+    <script src="fake-database.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-small">📦</div>
+                <h2>Smart Port</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="port-management.html" class="nav-item" data-page="port-management">
+                    <span class="nav-icon">⚓</span>
+                    <span>Port Management</span>
+                </a>
+                <a href="cargo-congestion.html" class="nav-item" data-page="cargo-congestion">
+                    <span class="nav-icon">📦</span>
+                    <span>Cargo Congestion</span>
+                </a>
+                <a href="berth-availability.html" class="nav-item" data-page="berth">
+                    <span class="nav-icon">🚢</span>
+                    <span>Berth Management</span>
+                </a>
+                <a href="crane-allocation.html" class="nav-item" data-page="crane">
+                    <span class="nav-icon">🏗️</span>
+                    <span>Crane Allocation</span>
+                </a>
+                <a href="port-traffic.html" class="nav-item" data-page="traffic">
+                    <span class="nav-icon">🚛</span>
+                    <span>Port Traffic</span>
+                </a>
+                <a href="freight-transportation.html" class="nav-item active" data-page="freight">
+                    <span class="nav-icon">📍</span>
+                    <span>Freight & Transport</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Freight & Transportation</h1>
+                    <p class="subtitle">Freight Flow & Shipment Tracking</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <span id="userEmail">m.michaelantonyxaviereee@gmail.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Freight Flow Diagram -->
+                <div class="freight-flow">
+                    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Freight Movement Process</h2>
+                    <div class="freight-route">
+                        <div class="freight-node">
+                            <div class="freight-node-icon">🚢</div>
+                            <div class="freight-node-label">Port</div>
+                            <div class="freight-node-desc">Cargo arrives at terminal</div>
+                        </div>
+                        <div class="freight-arrow">→</div>
+                        <div class="freight-node">
+                            <div class="freight-node-icon">🚛</div>
+                            <div class="freight-node-label">Truck</div>
+                            <div class="freight-node-desc">Loaded for transport</div>
+                        </div>
+                        <div class="freight-arrow">→</div>
+                        <div class="freight-node">
+                            <div class="freight-node-icon">🏭</div>
+                            <div class="freight-node-label">Warehouse</div>
+                            <div class="freight-node-desc">Temporary storage/processing</div>
+                        </div>
+                        <div class="freight-arrow">→</div>
+                        <div class="freight-node">
+                            <div class="freight-node-icon">📦</div>
+                            <div class="freight-node-label">Customer</div>
+                            <div class="freight-node-desc">Final destination</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Freight Shipments -->
+                <div>
+                    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Active Freight Shipments</h2>
+                    <table class="freight-table">
+                        <thead>
+                            <tr>
+                                <th>Shipment ID</th>
+                                <th>From Ship</th>
+                                <th>Containers</th>
+                                <th>Current Stage</th>
+                                <th>Progress</th>
+                                <th>Estimated Delivery</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shipmentTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Truck Assignments -->
+                <div style="margin-top: 40px;">
+                    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Truck Assignments</h2>
+                    <table class="freight-table">
+                        <thead>
+                            <tr>
+                                <th>Truck ID</th>
+                                <th>Cargo</th>
+                                <th>Status</th>
+                                <th>Gate</th>
+                                <th>Containers</th>
+                                <th>Arrival Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="truckTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Shipment Statistics -->
+                <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm);">
+                        <h4 style="font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 10px;">Total Shipments</h4>
+                        <div style="font-size: 28px; font-weight: 700; color: var(--primary-color);">12</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Tracked today</div>
+                    </div>
+
+                    <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm);">
+                        <h4 style="font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 10px;">In Transit</h4>
+                        <div style="font-size: 28px; font-weight: 700; color: var(--info-color);">5</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Currently moving</div>
+                    </div>
+
+                    <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm);">
+                        <h4 style="font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 10px;">Completed</h4>
+                        <div style="font-size: 28px; font-weight: 700; color: var(--success-color);">6</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Delivered</div>
+                    </div>
+
+                    <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm);">
+                        <h4 style="font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 10px;">Total Containers</h4>
+                        <div style="font-size: 28px; font-weight: 700; color: var(--primary-color);">1,247</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">In all shipments</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard-script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Populate shipment table
+            const shipmentTableBody = document.getElementById('shipmentTableBody');
+            
+            shipmentTableBody.innerHTML = FakeDatabase.cargo.map((cargo, index) => {
+                const ship = FakeDatabase.ships.find(s => s.id === cargo.ship);
+                const stages = ['At Port', 'In Transit', 'At Warehouse', 'In Warehouse', 'Ready for Pickup', 'In Transit to Customer', 'Delivered'];
+                const currentStageIndex = Math.floor((cargo.progress / 100) * (stages.length - 1));
+                const currentStage = stages[currentStageIndex];
+                
+                return `
+                    <tr>
+                        <td><strong>${cargo.id}</strong></td>
+                        <td>${ship ? ship.name : 'N/A'}</td>
+                        <td>${cargo.containers}</td>
+                        <td>
+                            <span class="freight-status-badge status-in-progress">
+                                ${currentStage}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="progress-bar" style="height: 6px;">
+                                <div class="progress-fill" style="width: ${cargo.progress}%"></div>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-secondary);">${cargo.progress}%</span>
+                        </td>
+                        <td>
+                            <span style="font-size: 12px; color: var(--text-secondary);">
+                                ${new Date(new Date().getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Populate truck table
+            const truckTableBody = document.getElementById('truckTableBody');
+            
+            truckTableBody.innerHTML = FakeDatabase.trucks.map(truck => {
+                const cargo = truck.cargo ? FakeDatabase.cargo.find(c => c.id === truck.cargo) : null;
+                const statusBadges = {
+                    'in_port': 'status-in-progress',
+                    'waiting': 'status-pending',
+                    'departed': 'status-completed'
+                };
+
+                return `
+                    <tr>
+                        <td><strong>${truck.id}</strong></td>
+                        <td>${cargo ? cargo.id : 'N/A'}</td>
+                        <td>
+                            <span class="freight-status-badge ${statusBadges[truck.status]}">
+                                ${truck.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                        </td>
+                        <td>${truck.gate}</td>
+                        <td>${cargo ? cargo.containers : '-'}</td>
+                        <td>${truck.arrived}</td>
+                    </tr>
+                `;
+            }).join('');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Port & Logistics - Dashboard">
+    <meta name="theme-color" content="#0066cc">
+    <title>Dashboard - Smart Port & Logistics</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <script src="config.js"></script>
+    <script src="fake-database.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-small">📦</div>
+                <h2>Smart Port</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="port-management.html" class="nav-item" data-page="port-management">
+                    <span class="nav-icon">⚓</span>
+                    <span>Port Management</span>
+                </a>
+                <a href="cargo-congestion.html" class="nav-item" data-page="cargo-congestion">
+                    <span class="nav-icon">📦</span>
+                    <span>Cargo Congestion</span>
+                </a>
+                <a href="berth-availability.html" class="nav-item" data-page="berth">
+                    <span class="nav-icon">🚢</span>
+                    <span>Berth Management</span>
+                </a>
+                <a href="crane-allocation.html" class="nav-item" data-page="crane">
+                    <span class="nav-icon">🏗️</span>
+                    <span>Crane Allocation</span>
+                </a>
+                <a href="port-traffic.html" class="nav-item" data-page="traffic">
+                    <span class="nav-icon">🚛</span>
+                    <span>Port Traffic</span>
+                </a>
+                <a href="freight-transportation.html" class="nav-item" data-page="freight">
+                    <span class="nav-icon">📍</span>
+                    <span>Freight & Transport</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Dashboard</h1>
+                    <p class="subtitle">Real-time Port Operations Overview</p>
+                </div>
+                <div class="header-right">
+                    <div class="time-display" id="timeDisplay">00:00:00</div>
+                    <div class="user-profile">
+                        <span id="userEmail">m.michaelantonyxaviereee@gmail.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Alert Banner -->
+            <div class="alert-banner alert-warning">
+                <span class="alert-icon">⚠️</span>
+                <span class="alert-text">Heavy truck traffic detected near Gate 2. Average waiting time: 25 minutes.</span>
+                <button class="alert-close" onclick="this.parentElement.style.display='none'">✕</button>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- KPI Cards -->
+                <div class="kpi-section">
+                    <h2>Key Performance Indicators</h2>
+                    <div class="kpi-grid">
+                        <!-- Total Ships -->
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <h3>Total Ships</h3>
+                                <span class="kpi-icon">🚢</span>
+                            </div>
+                            <div class="kpi-value" id="totalShips">24</div>
+                            <div class="kpi-meta">
+                                <span class="badge badge-info">+2 today</span>
+                            </div>
+                        </div>
+
+                        <!-- Ships Waiting -->
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <h3>Ships Waiting</h3>
+                                <span class="kpi-icon">⏳</span>
+                            </div>
+                            <div class="kpi-value status-warning" id="shipsWaiting">12</div>
+                            <div class="kpi-meta">
+                                <span class="badge badge-warning">Avg wait: 3.2h</span>
+                            </div>
+                        </div>
+
+                        <!-- Available Berths -->
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <h3>Available Berths</h3>
+                                <span class="kpi-icon">📍</span>
+                            </div>
+                            <div class="kpi-value status-success" id="availableBerths">4</div>
+                            <div class="kpi-meta">
+                                <span class="badge badge-success">Out of 8</span>
+                            </div>
+                        </div>
+
+                        <!-- Active Cranes -->
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <h3>Active Cranes</h3>
+                                <span class="kpi-icon">🏗️</span>
+                            </div>
+                            <div class="kpi-value" id="activeCranes">18</div>
+                            <div class="kpi-meta">
+                                <span class="badge badge-info">+4 available</span>
+                            </div>
+                        </div>
+
+                        <!-- Cargo Containers -->
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <h3>Cargo Containers</h3>
+                                <span class="kpi-icon">📦</span>
+                            </div>
+                            <div class="kpi-value" id="cargoContainers">2,450</div>
+                            <div class="kpi-meta">
+                                <span class="badge badge-info">87% capacity</span>
+                            </div>
+                        </div>
+
+                        <!-- Trucks in Port -->
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <h3>Trucks in Port</h3>
+                                <span class="kpi-icon">🚛</span>
+                            </div>
+                            <div class="kpi-value status-warning" id="trucksInPort">86</div>
+                            <div class="kpi-meta">
+                                <span class="badge badge-warning">Moderate traffic</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Section -->
+                <div class="status-section">
+                    <h2>Port Status Overview</h2>
+                    <div class="status-grid">
+                        <!-- Traffic Status -->
+                        <div class="status-card">
+                            <h4>Traffic Status</h4>
+                            <div class="status-indicator moderate">
+                                <span class="status-dot"></span>
+                                <span class="status-text">MODERATE</span>
+                            </div>
+                            <p class="status-detail">32 trucks in queue</p>
+                        </div>
+
+                        <!-- Expected Delays -->
+                        <div class="status-card">
+                            <h4>Expected Delays</h4>
+                            <div class="delay-bar">
+                                <div class="delay-fill" style="width: 65%"></div>
+                            </div>
+                            <p class="status-detail">2-3 hours average</p>
+                        </div>
+
+                        <!-- Deliveries in Progress -->
+                        <div class="status-card">
+                            <h4>Deliveries in Progress</h4>
+                            <div class="status-value">156</div>
+                            <p class="status-detail">45 completed today</p>
+                        </div>
+
+                        <!-- Crane Utilization -->
+                        <div class="status-card">
+                            <h4>Crane Utilization</h4>
+                            <div class="utilization-bar">
+                                <div class="utilization-fill" style="width: 82%">82%</div>
+                            </div>
+                            <p class="status-detail">18 of 22 cranes active</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <h3>Cargo Volume Trend (Last 7 Days)</h3>
+                        <canvas id="cargoChart"></canvas>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Truck Movement</h3>
+                        <canvas id="truckChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="activity-section">
+                    <h2>Recent Activity</h2>
+                    <div class="activity-feed">
+                        <div class="activity-item">
+                            <span class="activity-icon">🚢</span>
+                            <div class="activity-content">
+                                <p class="activity-title">Ship CMA CGM arrived at Berth 02</p>
+                                <p class="activity-time">2 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-icon">✅</span>
+                            <div class="activity-content">
+                                <p class="activity-title">Cargo batch #2450 completed unloading</p>
+                                <p class="activity-time">15 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-icon">🏗️</span>
+                            <div class="activity-content">
+                                <p class="activity-title">Crane 05 moved to maintenance</p>
+                                <p class="activity-time">1 hour ago</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-icon">🚛</span>
+                            <div class="activity-content">
+                                <p class="activity-title">120 trucks departed from port</p>
+                                <p class="activity-time">2 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="chart-utils.js"></script>
+    <script src="dashboard-script.js"></script>
+</body>
+</html>

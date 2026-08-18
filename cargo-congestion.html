@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cargo Congestion - Smart Port & Logistics">
+    <title>Cargo Congestion - Smart Port & Logistics</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <link rel="stylesheet" href="pages-style.css">
+    <script src="config.js"></script>
+    <script src="fake-database.js"></script>
+    <script src="chart-utils.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-small">📦</div>
+                <h2>Smart Port</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="port-management.html" class="nav-item" data-page="port-management">
+                    <span class="nav-icon">⚓</span>
+                    <span>Port Management</span>
+                </a>
+                <a href="cargo-congestion.html" class="nav-item active" data-page="cargo-congestion">
+                    <span class="nav-icon">📦</span>
+                    <span>Cargo Congestion</span>
+                </a>
+                <a href="berth-availability.html" class="nav-item" data-page="berth">
+                    <span class="nav-icon">🚢</span>
+                    <span>Berth Management</span>
+                </a>
+                <a href="crane-allocation.html" class="nav-item" data-page="crane">
+                    <span class="nav-icon">🏗️</span>
+                    <span>Crane Allocation</span>
+                </a>
+                <a href="port-traffic.html" class="nav-item" data-page="traffic">
+                    <span class="nav-icon">🚛</span>
+                    <span>Port Traffic</span>
+                </a>
+                <a href="freight-transportation.html" class="nav-item" data-page="freight">
+                    <span class="nav-icon">📍</span>
+                    <span>Freight & Transport</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Cargo Congestion</h1>
+                    <p class="subtitle">Yard Capacity & Congestion Monitoring</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <span id="userEmail">m.michaelantonyxaviereee@gmail.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Congestion Overview -->
+                <div class="congestion-overview">
+                    <div class="congestion-metric">
+                        <h4>Total Capacity</h4>
+                        <div class="congestion-value" id="totalCapacity">10,000</div>
+                        <div class="congestion-unit">Containers</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Current Stored</h4>
+                        <div class="congestion-value" id="currentStored">8,700</div>
+                        <div class="congestion-unit">Containers</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Pending Storage</h4>
+                        <div class="congestion-value" id="pendingContainers">1,200</div>
+                        <div class="congestion-unit">Containers</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Occupancy Rate</h4>
+                        <div class="congestion-value" id="occupancyRate">87%</div>
+                        <div class="congestion-unit">Capacity Used</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Average Unload Time</h4>
+                        <div class="congestion-value" id="unloadTime">4.2</div>
+                        <div class="congestion-unit">Hours</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Congestion Level</h4>
+                        <div class="congestion-indicator high" id="congestionLevel">HIGH</div>
+                    </div>
+                </div>
+
+                <!-- Occupancy Bar -->
+                <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 40px;">
+                    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">Yard Occupancy Status</h3>
+                    <div class="progress-bar" style="height: 30px;">
+                        <div class="progress-fill" style="width: 87%; background: linear-gradient(90deg, #ffc107, #dc3545); font-size: 14px;">87% Full</div>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-top: 12px;">
+                        ⚠️ <strong>High Congestion Alert:</strong> Yard is at 87% capacity. Recommend expediting cargo pickup or temporary storage at alternate facilities.
+                    </p>
+                </div>
+
+                <!-- Congestion Chart -->
+                <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 40px;">
+                    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">Cargo Volume Trend (Last 7 Days)</h3>
+                    <canvas id="congestionChart"></canvas>
+                </div>
+
+                <!-- Congestion Details -->
+                <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm);">
+                    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">Congestion Analysis</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--bg-light); border-radius: 4px;">
+                            <span>Containers Unloading/Day:</span>
+                            <strong style="color: var(--primary-color);">~450 containers</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--bg-light); border-radius: 4px;">
+                            <span>Containers Picking Up/Day:</span>
+                            <strong style="color: var(--primary-color);">~380 containers</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--bg-light); border-radius: 4px;">
+                            <span>Net Daily Growth:</span>
+                            <strong style="color: var(--danger-color);">+70 containers</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--bg-light); border-radius: 4px;">
+                            <span>Days Until Full Capacity:</span>
+                            <strong style="color: var(--danger-color);">~19 days</strong>
+                        </div>
+                        <div style="margin-top: 12px; padding: 12px; background: var(--warning-light); border-left: 4px solid var(--warning-color); border-radius: 4px; color: #856404;">
+                            <strong>⚠️ Recommendation:</strong> Increase truck pickup operations or arrange temporary container storage at nearby facilities to prevent yard overflow.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard-script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update congestion metrics
+            const yard = FakeDatabase.yard;
+            
+            document.getElementById('totalCapacity').textContent = (yard.totalCapacity).toLocaleString();
+            document.getElementById('currentStored').textContent = (yard.currentContainers).toLocaleString();
+            document.getElementById('pendingContainers').textContent = (yard.pendingContainers).toLocaleString();
+            document.getElementById('occupancyRate').textContent = yard.occupancy + '%';
+            document.getElementById('unloadTime').textContent = yard.averageUnloadingTime;
+            
+            const congestionLevel = document.getElementById('congestionLevel');
+            congestionLevel.textContent = yard.congestionLevel;
+            congestionLevel.className = 'congestion-indicator ' + yard.congestionLevel.toLowerCase();
+
+            // Draw congestion chart
+            const chart = new SimpleChart('congestionChart', 'line');
+            chart.draw({
+                labels: FakeDatabase.cargoVolumeHistory.map(d => d.day),
+                datasets: [
+                    {
+                        label: 'Cargo Volume',
+                        data: FakeDatabase.cargoVolumeHistory.map(d => d.volume),
+                        color: '#0066cc',
+                    }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

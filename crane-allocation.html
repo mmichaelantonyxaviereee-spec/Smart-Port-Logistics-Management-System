@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Crane Allocation - Smart Port & Logistics">
+    <title>Crane Allocation - Smart Port & Logistics</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <link rel="stylesheet" href="pages-style.css">
+    <script src="config.js"></script>
+    <script src="fake-database.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-small">📦</div>
+                <h2>Smart Port</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="port-management.html" class="nav-item" data-page="port-management">
+                    <span class="nav-icon">⚓</span>
+                    <span>Port Management</span>
+                </a>
+                <a href="cargo-congestion.html" class="nav-item" data-page="cargo-congestion">
+                    <span class="nav-icon">📦</span>
+                    <span>Cargo Congestion</span>
+                </a>
+                <a href="berth-availability.html" class="nav-item" data-page="berth">
+                    <span class="nav-icon">🚢</span>
+                    <span>Berth Management</span>
+                </a>
+                <a href="crane-allocation.html" class="nav-item active" data-page="crane">
+                    <span class="nav-icon">🏗️</span>
+                    <span>Crane Allocation</span>
+                </a>
+                <a href="port-traffic.html" class="nav-item" data-page="traffic">
+                    <span class="nav-icon">🚛</span>
+                    <span>Port Traffic</span>
+                </a>
+                <a href="freight-transportation.html" class="nav-item" data-page="freight">
+                    <span class="nav-icon">📍</span>
+                    <span>Freight & Transport</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Crane Allocation</h1>
+                    <p class="subtitle">Crane Assignment & Utilization Management</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <span id="userEmail">m.michaelantonyxaviereee@gmail.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Info Box -->
+                <div style="background: var(--info-light); border: 1px solid var(--info-color); border-radius: 8px; padding: 16px; margin-bottom: 30px;">
+                    <p style="font-size: 13px; color: #0c5460;">
+                        <strong>📋 Crane Allocation Definition:</strong> Assigning appropriate number of cranes to each ship based on cargo volume, unloading time requirements, and crane availability. Optimal allocation improves throughput and reduces ship waiting times.
+                    </p>
+                </div>
+
+                <!-- Crane Overview Stats -->
+                <div class="crane-overview">
+                    <div class="crane-stat">
+                        <h4>Total Cranes</h4>
+                        <div class="crane-stat-value">22</div>
+                    </div>
+
+                    <div class="crane-stat">
+                        <h4>Active Cranes</h4>
+                        <div class="crane-stat-value" id="activeCranesCount">11</div>
+                    </div>
+
+                    <div class="crane-stat">
+                        <h4>Idle Cranes</h4>
+                        <div class="crane-stat-value" id="idleCranesCount">11</div>
+                    </div>
+
+                    <div class="crane-stat">
+                        <h4>Average Utilization</h4>
+                        <div class="crane-stat-value" id="avgUtilization">82%</div>
+                    </div>
+                </div>
+
+                <!-- Ships with Assigned Cranes -->
+                <div style="margin-bottom: 40px;">
+                    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Ships & Crane Assignments</h2>
+                    <div class="crane-allocation-grid" id="craneAssignmentsGrid">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- All Cranes List -->
+                <div style="background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm);">
+                    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Crane Status & Availability</h2>
+                    <div id="cranesList">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard-script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Calculate crane stats
+            const activeCranes = FakeDatabase.cranes.filter(c => c.status === 'active').length;
+            const idleCranes = FakeDatabase.cranes.filter(c => c.status === 'idle').length;
+            const avgUtil = (FakeDatabase.cranes.reduce((sum, c) => sum + c.utilization, 0) / FakeDatabase.cranes.length).toFixed(0);
+
+            document.getElementById('activeCranesCount').textContent = activeCranes;
+            document.getElementById('idleCranesCount').textContent = idleCranes;
+            document.getElementById('avgUtilization').textContent = avgUtil + '%';
+
+            // Show crane assignments by ship
+            const craneAssignmentsGrid = document.getElementById('craneAssignmentsGrid');
+            const shipsWithCranes = FakeDatabase.ships.filter(s => 
+                s.status === 'berthed' || s.status === 'loading'
+            );
+
+            craneAssignmentsGrid.innerHTML = shipsWithCranes.map(ship => {
+                const assignedCranes = FakeDatabase.cranes.filter(c => c.ship === ship.id);
+                return `
+                    <div class="crane-assignment-card">
+                        <h4>${ship.name}</h4>
+                        <div class="crane-list">
+                            ${assignedCranes.length > 0 ? 
+                                assignedCranes.map(crane => `
+                                    <div class="crane-item">
+                                        <span class="crane-item-name">${crane.name}</span>
+                                        <span class="crane-item-status">${crane.utilization}%</span>
+                                    </div>
+                                `).join('') :
+                                '<p style="font-size: 12px; color: var(--text-secondary); padding: 8px;">No cranes assigned</p>'
+                            }
+                        </div>
+                        <div style="font-size: 12px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+                            <strong>Containers:</strong> ${ship.containers} | <strong>Assigned:</strong> ${assignedCranes.length} cranes
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Show all cranes with status
+            const cranesList = document.getElementById('cranesList');
+            const cranesTable = `
+                <table class="freight-table">
+                    <thead>
+                        <tr>
+                            <th>Crane ID</th>
+                            <th>Status</th>
+                            <th>Assigned Ship</th>
+                            <th>Utilization</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${FakeDatabase.cranes.map(crane => {
+                            const ship = crane.ship ? FakeDatabase.ships.find(s => s.id === crane.ship) : null;
+                            return `
+                                <tr>
+                                    <td><strong>${crane.name}</strong></td>
+                                    <td>
+                                        <span class="freight-status-badge status-${crane.status}">
+                                            ${crane.status.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td>${ship ? ship.name : '-'}</td>
+                                    <td>
+                                        <div class="progress-bar" style="height: 6px;">
+                                            <div class="progress-fill" style="width: ${crane.utilization}%"></div>
+                                        </div>
+                                        <span style="font-size: 11px; color: var(--text-secondary);">${crane.utilization}%</span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            cranesList.innerHTML = cranesTable;
+        });
+    </script>
+
+    <style>
+        .status-active { background: var(--success-light); color: #155724; }
+        .status-idle { background: var(--info-light); color: #0c5460; }
+        .status-maintenance { background: var(--warning-light); color: #856404; }
+    </style>
+</body>
+</html>

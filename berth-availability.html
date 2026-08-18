@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Berth Availability - Smart Port & Logistics">
+    <title>Berth Availability - Smart Port & Logistics</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <link rel="stylesheet" href="pages-style.css">
+    <script src="config.js"></script>
+    <script src="fake-database.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-small">📦</div>
+                <h2>Smart Port</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="port-management.html" class="nav-item" data-page="port-management">
+                    <span class="nav-icon">⚓</span>
+                    <span>Port Management</span>
+                </a>
+                <a href="cargo-congestion.html" class="nav-item" data-page="cargo-congestion">
+                    <span class="nav-icon">📦</span>
+                    <span>Cargo Congestion</span>
+                </a>
+                <a href="berth-availability.html" class="nav-item active" data-page="berth">
+                    <span class="nav-icon">🚢</span>
+                    <span>Berth Management</span>
+                </a>
+                <a href="crane-allocation.html" class="nav-item" data-page="crane">
+                    <span class="nav-icon">🏗️</span>
+                    <span>Crane Allocation</span>
+                </a>
+                <a href="port-traffic.html" class="nav-item" data-page="traffic">
+                    <span class="nav-icon">🚛</span>
+                    <span>Port Traffic</span>
+                </a>
+                <a href="freight-transportation.html" class="nav-item" data-page="freight">
+                    <span class="nav-icon">📍</span>
+                    <span>Freight & Transport</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Berth Availability</h1>
+                    <p class="subtitle">Berth Management & Scheduling</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <span id="userEmail">m.michaelantonyxaviereee@gmail.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Berth Summary Stats -->
+                <div class="congestion-overview">
+                    <div class="congestion-metric">
+                        <h4>Total Berths</h4>
+                        <div class="congestion-value">8</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Occupied</h4>
+                        <div class="congestion-value" id="occupiedCount">5</div>
+                        <div class="congestion-indicator info">ACTIVE</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Available</h4>
+                        <div class="congestion-value" id="availableCount">2</div>
+                        <div class="congestion-indicator low">READY</div>
+                    </div>
+
+                    <div class="congestion-metric">
+                        <h4>Maintenance</h4>
+                        <div class="congestion-value">1</div>
+                        <div class="congestion-indicator medium">SERVICING</div>
+                    </div>
+                </div>
+
+                <!-- Berth Cards -->
+                <div class="berths-grid" id="berthsGrid">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard-script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const berthsGrid = document.getElementById('berthsGrid');
+            
+            // Count berths by status
+            const occupied = FakeDatabase.berths.filter(b => b.status === 'occupied').length;
+            const available = FakeDatabase.berths.filter(b => b.status === 'available').length;
+            
+            document.getElementById('occupiedCount').textContent = occupied;
+            document.getElementById('availableCount').textContent = available;
+
+            // Render berths
+            berthsGrid.innerHTML = FakeDatabase.berths.map(berth => {
+                const ship = berth.ship ? FakeDatabase.ships.find(s => s.id === berth.ship) : null;
+                
+                let html = `
+                    <div class="berth-card ${berth.status}">
+                        <div class="berth-header">
+                            <h3>${berth.name}</h3>
+                            <span class="berth-status-badge ${berth.status}">${berth.status.toUpperCase()}</span>
+                        </div>
+                `;
+
+                if (berth.status === 'occupied' && ship) {
+                    html += `
+                        <div class="berth-timeline">
+                            <strong>Ship:</strong> ${ship.name}<br>
+                            <strong>Containers:</strong> ${ship.containers}<br>
+                            <strong>Cranes Assigned:</strong> ${berth.cranes.length}<br>
+                            <strong>ETA:</strong> ${ship.eta} | <strong>ETD:</strong> ${ship.etd || 'TBD'}
+                        </div>
+                    `;
+                } else if (berth.status === 'available') {
+                    html += `
+                        <div class="berth-timeline" style="background: var(--success-light); border-color: var(--success-color); color: #155724;">
+                            ✓ Ready for incoming ships<br>
+                            Capacity: ${berth.capacity} containers<br>
+                            No current assignment
+                        </div>
+                    `;
+                } else if (berth.status === 'maintenance') {
+                    html += `
+                        <div class="berth-timeline" style="background: var(--warning-light); border-color: var(--warning-color); color: #856404;">
+                            ⚠️ Under Maintenance<br>
+                            Expected to resume: 2-4 hours
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+                return html;
+            }).join('');
+        });
+    </script>
+</body>
+</html>
