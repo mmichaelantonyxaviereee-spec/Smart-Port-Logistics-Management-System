@@ -54,7 +54,7 @@ python -m http.server 8000
    - ✓ Click eye icon → Hide/show password
    - ✓ Check "Remember me" → Email is saved
    - ✓ Fill form correctly → See success message
-   - ✓ Click social login buttons → Placeholders for OAuth
+    - ✓ Click social login buttons → Start Google or Microsoft OAuth after provider setup
    - ✓ Click "Forgot password" → Placeholder for reset flow
    - ✓ Resize browser → See responsive design
 
@@ -105,6 +105,24 @@ LINKS: {
 ```
 
 **That's it!** Your customized login page is ready.
+
+### Step 4: Enable Google and Microsoft Sign-In
+
+OAuth requires an HTTP origin. Use Live Server or another local web server; opening `index.html` directly with `file://` cannot complete OAuth.
+
+1. Register a Google OAuth client as a **Web application** in Google Cloud Console.
+2. Register a Microsoft app in Microsoft Entra ID as a **Single-page application**.
+3. For both apps, add the exact URL shown by your local server as a redirect URI, for example `http://127.0.0.1:5500/index.html`.
+4. Copy each client ID into `config.js`:
+
+```javascript
+OAUTH: {
+    MICROSOFT: { CLIENT_ID: 'your-entra-application-client-id' },
+    GOOGLE: { CLIENT_ID: 'your-google-web-client-id' }
+}
+```
+
+The login page uses Authorization Code + PKCE, validates the OAuth state, stores the returned access token, and sends the signed-in user to `dashboard.html`.
 
 ---
 

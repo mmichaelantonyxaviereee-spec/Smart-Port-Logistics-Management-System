@@ -4,6 +4,8 @@
 
 // Update time display
 function updateTime() {
+    const timeDisplay = document.getElementById('timeDisplay');
+    if (!timeDisplay) return;
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -43,17 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elements.trucksInPort) elements.trucksInPort.textContent = summary.trucksInPort;
 
     // Draw charts
-    drawCharts();
+    if (document.getElementById('cargoChart') || document.getElementById('truckChart')) {
+        drawCharts();
+    }
 
     // Setup navigation
+    renderExtendedNavigation();
     setupNavigation();
 });
 
 // Draw charts
 function drawCharts() {
     // Cargo Volume Chart
-    const cargoChart = new SimpleChart('cargoChart', 'line');
-    cargoChart.draw({
+    const cargoChart = document.getElementById('cargoChart') ? new SimpleChart('cargoChart', 'line') : null;
+    cargoChart?.draw({
         labels: FakeDatabase.cargoVolumeHistory.map(d => d.day),
         datasets: [
             {
@@ -65,8 +70,8 @@ function drawCharts() {
     });
 
     // Truck Movement Chart
-    const truckChart = new SimpleChart('truckChart', 'bar');
-    truckChart.draw({
+    const truckChart = document.getElementById('truckChart') ? new SimpleChart('truckChart', 'bar') : null;
+    truckChart?.draw({
         labels: FakeDatabase.truckMovementHistory.map(d => d.time),
         datasets: [
             {
@@ -81,6 +86,27 @@ function drawCharts() {
             }
         ]
     });
+}
+
+function renderExtendedNavigation() {
+    const navigation = document.querySelector('.sidebar-nav');
+    if (!navigation) return;
+
+    const links = [
+        ['dashboard.html', '📊', 'Dashboard'], ['port-management.html', '⚓', 'Port Management'],
+        ['cargo-congestion.html', '📦', 'Cargo Congestion'], ['berth-availability.html', '🚢', 'Berth Management'],
+        ['crane-allocation.html', '🏗️', 'Crane Allocation'], ['port-traffic.html', '🚛', 'Port Traffic'],
+        ['freight-transportation.html', '📍', 'Freight & Transportation'], ['route-optimization.html', '🧭', 'Route Optimization'],
+        ['vehicle-tracking.html', '🚚', 'Vehicle Tracking'], ['supply-chain.html', '🔗', 'Supply Chain'],
+        ['smart-logistics.html', '🧠', 'Smart Logistics'], ['eta-prediction.html', '⏱️', 'ETA Prediction'],
+        ['analytics.html', '📈', 'Analytics'], ['alerts.html', '🔔', 'Alerts'],
+        ['mind-map.html', '🗺️', 'Mind Map'], ['settings.html', '⚙️', 'Settings']
+    ];
+    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+    navigation.innerHTML = links.map(([href, icon, label]) => `
+        <a href="${href}" class="nav-item${href === currentPage ? ' active' : ''}">
+            <span class="nav-icon">${icon}</span><span>${label}</span>
+        </a>`).join('');
 }
 
 // Setup navigation

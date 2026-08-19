@@ -52,15 +52,18 @@ const CONFIG = {
         MICROSOFT: {
             ENABLED: true,
             CLIENT_ID: 'your-microsoft-client-id',
-            REDIRECT_URI: window.location.origin + '/callback/microsoft',
-            SCOPES: ['openid', 'profile', 'email'],
+            AUTHORITY: 'https://login.microsoftonline.com/common',
+            REDIRECT_URI: window.location.origin + window.location.pathname,
+            SCOPES: ['openid', 'profile', 'email', 'User.Read'],
         },
         
         // Google OAuth
         GOOGLE: {
             ENABLED: true,
             CLIENT_ID: 'your-google-client-id',
-            REDIRECT_URI: window.location.origin + '/callback/google',
+            AUTHORIZATION_ENDPOINT: 'https://accounts.google.com/o/oauth2/v2/auth',
+            TOKEN_ENDPOINT: 'https://oauth2.googleapis.com/token',
+            REDIRECT_URI: window.location.origin + window.location.pathname,
             SCOPES: ['openid', 'profile', 'email'],
         },
     },

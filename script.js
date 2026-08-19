@@ -243,26 +243,135 @@ function loadRememberedEmail() {
 }
 
 /**
- * Handle Social Login (Microsoft)
+ * Start OAuth with Authorization Code + PKCE.
  */
-document.querySelectorAll('.social-button.microsoft').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        console.log('Microsoft OAuth would initiate here');
-        alert('Microsoft login integration would be configured here');
+document.querySelectorAll('.social-button.microsoft').forEach(button => {
+    button.addEventListener('click', event => {
+        event.preventDefault();
+        startOAuth('microsoft');
     });
 });
 
-/**
- * Handle Social Login (Google)
- */
-document.querySelectorAll('.social-button.google').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        console.log('Google OAuth would initiate here');
-        alert('Google login integration would be configured here');
+document.querySelectorAll('.social-button.google').forEach(button => {
+    button.addEventListener('click', event => {
+        event.preventDefault();
+        startOAuth('google');
     });
 });
+
+const oauthProviders = {
+    microsoft: {
+        config: CONFIG.OAUTH.MICROSOFT,
+        authorizationEndpoint: `${CONFIG.OAUTH.MICROSOFT.AUTHORITY}/oauth2/v2.0/authorize`,
+        tokenEndpoint: `${CONFIG.OAUTH.MICROSOFT.AUTHORITY}/oauth2/v2.0/token`,
+        userInfoEndpoint: 'https://graph.microsoft.com/oidc/userinfo'
+    },
+    google: {
+        config: CONFIG.OAUTH.GOOGLE,
+        authorizationEndpoint: CONFIG.OAUTH.GOOGLE.AUTHORIZATION_ENDPOINT,
+        tokenEndpoint: CONFIG.OAUTH.GOOGLE.TOKEN_ENDPOINT,
+        userInfoEndpoint: 'https://openidconnect.googleapis.com/v1/userinfo'
+    }
+};
+
+function isConfigured(clientId) {
+    return clientId && !clientId.startsWith('your-');
+}
+
+function base64UrlEncode(value) {
+    return btoa(String.fromCharCode(...new Uint8Array(value)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function randomValue() {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    return base64UrlEncode(bytes);
+}
+
+async function createCodeChallenge(verifier) {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+    return base64UrlEncode(digest);
+}
+
+async function startOAuth(providerName) {
+    const provider = oauthProviders[providerName];
+    if (!provider || !provider.config.ENABLED) {
+        showOAuthError(`${providerName} sign-in is disabled.`);
+        return;
+    }
+
+    if (!isConfigured(provider.config.CLIENT_ID)) {
+        showOAuthError(`Add the ${providerName} OAuth client ID in config.js before signing in.`);
+        return;
+    }
+
+    if (window.location.protocol === 'file:') {
+        showOAuthError('OAuth needs a local web server. Open this page with Live Server or another HTTP server.');
+        return;
+    }
+
+    const state = randomValue();
+    const verifier = randomValue();
+    const challenge = await createCodeChallenge(verifier);
+    sessionStorage.setItem('oauthTransaction', JSON.stringify({ providerName, state, verifier }));
+
+    const params = new URLSearchParams({
+        client_id: provider.config.CLIENT_ID,
+        response_type: 'code',
+        redirect_uri: provider.config.REDIRECT_URI,
+        response_mode: 'query',
+        scope: provider.config.SCOPES.join(' '),
+        state,
+        code_challenge: challenge,
+        code_challenge_method: 'S256'
+    });
+    window.location.assign(`${provider.authorizationEndpoint}?${params}`);
+}
+
+async function handleOAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const returnedState = params.get('state');
+    const error = params.get('error_description') || params.get('error');
+    const transaction = JSON.parse(sessionStorage.getItem('oauthTransaction') || 'null');
+    if (!code && !error) return;
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+    sessionStorage.removeItem('oauthTransaction');
+    if (error) throw new Error(error);
+    if (!transaction || transaction.state !== returnedState) throw new Error('OAuth state validation failed.');
+
+    const provider = oauthProviders[transaction.providerName];
+    const body = new URLSearchParams({
+        client_id: provider.config.CLIENT_ID,
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: provider.config.REDIRECT_URI,
+        code_verifier: transaction.verifier
+    });
+    const tokenResponse = await fetch(provider.tokenEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+    });
+    if (!tokenResponse.ok) throw new Error('The provider could not complete sign-in. Check the registered redirect URI.');
+
+    const tokens = await tokenResponse.json();
+    const userResponse = await fetch(provider.userInfoEndpoint, {
+        headers: { Authorization: `Bearer ${tokens.access_token}` }
+    });
+    const user = userResponse.ok ? await userResponse.json() : {};
+    localStorage.setItem(CONFIG.AUTH.TOKEN_STORAGE_KEY, tokens.access_token);
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    window.location.assign('dashboard.html');
+}
+
+function showOAuthError(message) {
+    showPasswordError(message);
+}
+
+handleOAuthCallback().catch(error => showOAuthError(error.message || 'Sign-in failed.'));
 
 /**
  * Handle Forgot Password
